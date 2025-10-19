@@ -2,48 +2,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const darkModeToggle = document.getElementById('darkModeToggle');
     const body = document.body;
     const darkModeIcon = darkModeToggle.querySelector('i');
-    const darkModeText = darkModeToggle.querySelector('span');
+    const darkModeText = darkModeToggle.querySelector('span'); // Asegúrate de que el span existe en el HTML
 
-    // Function to set dark mode
+    // Función para aplicar o remover el modo oscuro
     const setDarkMode = (isDark) => {
         if (isDark) {
             body.classList.add('dark');
             darkModeIcon.classList.remove('fa-moon');
             darkModeIcon.classList.add('fa-sun');
-            darkModeText.textContent = 'Modo Claro';
+            darkModeText.textContent = 'Modo Claro'; // Cambia el texto del botón
             localStorage.setItem('darkMode', 'enabled');
         } else {
             body.classList.remove('dark');
             darkModeIcon.classList.remove('fa-sun');
             darkModeIcon.classList.add('fa-moon');
-            darkModeText.textContent = 'Modo Oscuro';
+            darkModeText.textContent = 'Modo Oscuro'; // Cambia el texto del botón
             localStorage.setItem('darkMode', 'disabled');
         }
     };
 
-    // Check for saved dark mode preference or system preference
+    // 1. Intentar cargar la preferencia guardada en localStorage
     const savedDarkMode = localStorage.getItem('darkMode');
+
     if (savedDarkMode === 'enabled') {
         setDarkMode(true);
-    } else if (savedDarkMode === null && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        // Auto-detect system preference only if no explicit user preference is saved
-        setDarkMode(true);
+    } else if (savedDarkMode === 'disabled') {
+        setDarkMode(false);
     } else {
-        setDarkMode(false); // Ensure light mode is set if no dark preference
+        // 2. Si no hay preferencia guardada, verificar la preferencia del sistema
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            setDarkMode(true); // Activa modo oscuro si el sistema lo prefiere
+        } else {
+            setDarkMode(false); // Por defecto, modo claro si no hay preferencia guardada ni del sistema oscuro
+        }
     }
 
-    // Toggle dark mode on button click
+    // 3. Manejar el click del botón para alternar el modo oscuro
     darkModeToggle.addEventListener('click', () => {
+        // Alterna el estado actual
         setDarkMode(!body.classList.contains('dark'));
     });
 
-    // Smooth scroll for navbar links
+    // Smooth scroll para los enlaces de la barra de navegación
     document.querySelectorAll('a.nav-link[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const targetId = this.getAttribute('href');
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
+                // Obtener la altura de la navbar para el offset del scroll
                 const navbarHeight = document.querySelector('.navbar').offsetHeight;
                 const offsetPosition = targetElement.offsetTop - navbarHeight;
 
@@ -52,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     behavior: 'smooth'
                 });
 
-                // Close navbar on mobile after clicking a link
+                // Cerrar la navbar en móviles después de hacer clic en un enlace
                 const navbarCollapse = document.getElementById('navbarNav');
                 if (navbarCollapse.classList.contains('show')) {
                     const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
@@ -64,17 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Form submission handler
+    // Formulario de contacto
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
         contactForm.addEventListener('submit', function (e) {
-            e.preventDefault(); // Prevent actual form submission
+            e.preventDefault();
             alert('¡Mensaje enviado! 📧 Gracias por contactarme, Juan Pérez.');
-            contactForm.reset(); // Clear the form
+            contactForm.reset();
         });
     }
-
-    // Update active navbar link on scroll (Bootstrap's scrollspy handles this, but custom logic for offset might be needed)
-    // For Bootstrap 5, ensure `data-bs-spy="scroll"` and `data-bs-target="#mainNav"` are on the body tag.
-    // The `data-bs-offset="50"` in body is crucial for correcting scroll position below fixed navbar.
 });
